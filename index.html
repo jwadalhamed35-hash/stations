@@ -963,5 +963,71 @@
             }; r.readAsArrayBuffer(f); inp.value='';
         }
     </script>
+    <div style="padding: 20px; background: #f0f0f0; border: 1px solid #ccc; margin: 20px 0;">
+  <h3>منطقة تجربة الربط</h3>
+  <button onclick="fetchData()">جلب البيانات من الشيت (تحديث)</button>
+  <button onclick="testSend()">إرسال بيانات تجريبية للشيت</button>
+  <p id="status-msg" style="color: blue;"></p>
+</div>
+
+<script>
+  // 1. رابط السكربت الخاص بك
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyc7SPsyCREC7MR3Je3sk0J0NPlVuFM9ZzZBjDCPhZvl79_WJDkquSTCo7HUHOETuGU/exec";
+
+  // 2. دالة لجلب البيانات من الشيت
+  function fetchData() {
+    document.getElementById("status-msg").innerText = "جاري جلب البيانات...";
+    
+    fetch(GOOGLE_SCRIPT_URL)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          console.log("البيانات المستلمة:", data.data);
+          document.getElementById("status-msg").innerText = "تم جلب البيانات بنجاح! راجع الـ Console (F12)";
+          
+          // هنا يمكنك إضافة كود لتحديث عناصر الداش بورد بناءً على data.data
+        }
+      })
+      .catch(error => {
+        console.error("خطأ:", error);
+        document.getElementById("status-msg").innerText = "حدث خطأ في الاتصال";
+      });
+  }
+
+  // 3. دالة لإرسال بيانات (مثال لاستخدامه في نماذج الإدخال)
+  function sendData(dataArray) {
+    // نستخدم 'no-cors' لتجنب مشاكل المتصفح مع السكربتات الخارجية أحياناً، 
+    // ولكن الطريقة القياسية هي POST عادي. سنجرب الطريقة العادية أولاً.
+    
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ values: dataArray })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("تم الإرسال:", data);
+      document.getElementById("status-msg").innerText = "تم حفظ البيانات في الشيت بنجاح!";
+      
+      // تحديث البيانات بعد الإرسال لرؤية التغيير
+      fetchData(); 
+    })
+    .catch(error => {
+      console.error("خطأ في الإرسال:", error);
+      document.getElementById("status-msg").innerText = "فشل الإرسال، تأكد من الصلاحيات";
+    });
+  }
+
+  // 4. دالة تجربة الإرسال (مرتبطة بالزر التجريبي أعلاه)
+  function testSend() {
+    document.getElementById("status-msg").innerText = "جاري الإرسال...";
+    // سنرسل صفاً تجريبياً يحتوي على: الاسم، الوظيفة، التاريخ
+    var testRow = ["جواد", "تجربة من الداش بورد", new Date().toLocaleTimeString()];
+    sendData(testRow);
+  }
+
+  // تشغيل جلب البيانات تلقائياً عند فتح الصفحة
+  window.onload = fetchData;
+</script>
 </body>
 </html>
+
